@@ -23,7 +23,7 @@ export default async function CalisanPage({
 
   // Seçili hizmetlerin tamamını sunan çalışanları getir
   const employees = await prisma.user.findMany({
-    where: { role: "EMPLOYEE" },
+    where: { role: "EMPLOYEE", isActive: true },
     include: {
       workerServices: {
         where: { serviceId: { in: serviceIds } },

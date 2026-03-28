@@ -3,6 +3,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusActions } from "@/components/ui/status-actions";
 import { DatePicker } from "./DatePicker";
 import { Appointment, AppointmentService, Service, User } from "@prisma/client";
+import Link from "next/link";
 
 export const runtime = "nodejs";
 
@@ -24,6 +25,10 @@ function toDateString(date: Date) {
 function AppointmentCard({ appointment }: { appointment: AppointmentWithRelations }) {
   const start = toTimeString(appointment.startTime);
   const end = toTimeString(appointment.endTime);
+  const totalPrice = appointment.services.reduce(
+    (sum, appointmentService) => sum + Number(appointmentService.service.price),
+    0
+  );
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-2">
@@ -51,6 +56,11 @@ function AppointmentCard({ appointment }: { appointment: AppointmentWithRelation
             {appointmentService.service.name}
           </span>
         ))}
+      </div>
+
+      <div className="flex items-center justify-between pt-1">
+        <span className="text-xs text-muted-foreground">Toplam Tutar</span>
+        <span className="text-sm font-semibold">₺{totalPrice}</span>
       </div>
 
       <StatusActions appointmentId={appointment.id} status={appointment.status} />
@@ -125,6 +135,9 @@ export default async function CalisanPanel({
     <main className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-lg px-4 py-8">
         <header className="mb-6">
+          <Link href="/calisan" className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-block">
+            ← Çalışanlar
+          </Link>
           <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold">Randevular</h1>
