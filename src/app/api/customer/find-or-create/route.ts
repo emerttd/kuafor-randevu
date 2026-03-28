@@ -30,18 +30,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const fakeEmail = `${phone}@kuafor.local`;
-
-    const existingCustomer = await prisma.user.findFirst({
-      where: {
-        role: "CUSTOMER",
-        email: fakeEmail,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
+    const existingCustomer = await prisma.user.findUnique({
+      where: { phone },
+      select: { id: true, name: true, phone: true },
     });
 
     if (existingCustomer) {
@@ -51,15 +42,12 @@ export async function POST(req: Request) {
     const createdCustomer = await prisma.user.create({
       data: {
         name,
-        email: fakeEmail,
+        phone,
+        email: `${phone}@kuafor.local`,
         password: "placeholder-password",
         role: "CUSTOMER",
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
+      select: { id: true, name: true, phone: true },
     });
 
     return NextResponse.json(createdCustomer, { status: 201 });
