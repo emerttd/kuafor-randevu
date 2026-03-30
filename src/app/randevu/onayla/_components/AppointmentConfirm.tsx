@@ -118,7 +118,7 @@ export default function AppointmentConfirm({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="w-full max-w-lg mx-auto flex flex-col flex-1">
+      <div className="w-full max-w-2xl mx-auto flex flex-col flex-1">
         <header className="px-4 pt-10 pb-4">
           <button
             onClick={() => router.back()}

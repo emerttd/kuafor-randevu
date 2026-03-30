@@ -34,7 +34,7 @@ export default function ServiceSelector({ services }: { services: Service[] }) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="w-full max-w-lg mx-auto flex flex-col flex-1">
+      <div className="w-full max-w-2xl mx-auto flex flex-col flex-1">
         <header className="px-4 pt-10 pb-4">
           <p className="text-sm text-muted-foreground mb-1">Adım 1 / 4</p>
           <h1 className="text-2xl font-semibold tracking-tight">Hizmet Seçin</h1>
@@ -86,7 +86,7 @@ export default function ServiceSelector({ services }: { services: Service[] }) {
 
       {selected.size > 0 && (
         <div className="sticky bottom-0 border-t border-border bg-background">
-          <div className="w-full max-w-lg mx-auto px-4 pb-8 pt-4">
+          <div className="w-full max-w-2xl mx-auto px-4 pb-8 pt-4">
             <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground">
               <span>{selected.size} hizmet seçildi</span>
               <span>

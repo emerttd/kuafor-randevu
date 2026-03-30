@@ -133,7 +133,7 @@ export default async function CalisanPanel({
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto w-full max-w-lg px-4 py-8">
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
         <header className="mb-6">
           <Link href="/calisan" className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-block">
             ← Çalışanlar

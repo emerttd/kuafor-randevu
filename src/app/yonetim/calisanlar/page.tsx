@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { createEmployee, updateEmployee, toggleEmployeeStatus, updateEmployeeServices } from "./actions";
+import { updateEmployee, toggleEmployeeStatus, updateEmployeeServices } from "./actions";
+import { AddEmployeeForm } from "./AddEmployeeForm";
 import { SubmitButton } from "@/components/ui/submit-button";
 
 export const runtime = "nodejs";
@@ -25,7 +26,7 @@ export default async function EmployeeManagementPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto w-full max-w-lg px-4 py-8">
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
         <header className="mb-6 flex items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Çalışan Yönetimi</h1>
@@ -41,30 +42,7 @@ export default async function EmployeeManagementPage() {
           </Link>
         </header>
 
-        <section className="mb-6 rounded-xl border border-border bg-card p-4">
-          <h2 className="mb-3 text-sm font-semibold">Yeni Çalışan Ekle</h2>
-          <form action={createEmployee} className="space-y-3">
-            <div>
-              <label
-                htmlFor="name"
-                className="mb-1 block text-sm font-medium text-foreground"
-              >
-                Çalışan adı
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="Örn: Ahmet Yılmaz"
-                className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none placeholder:text-muted-foreground"
-              />
-            </div>
-            <SubmitButton
-              label="Çalışan Ekle"
-              className="h-11 bg-foreground text-background"
-            />
-          </form>
-        </section>
+        <AddEmployeeForm />
 
         <section>
           <h2 className="mb-3 text-sm font-semibold">Mevcut Çalışanlar</h2>
