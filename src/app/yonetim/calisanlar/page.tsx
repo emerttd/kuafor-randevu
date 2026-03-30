@@ -104,6 +104,22 @@ export default async function EmployeeManagementPage() {
                     />
                   </form>
 
+                  {/* Çalışan linkleri */}
+                  <div className="mt-3 flex gap-4">
+                    <Link
+                      href={`/yonetim/calisanlar/${employee.id}/calisma-saatleri`}
+                      className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+                    >
+                      Çalışma saatleri →
+                    </Link>
+                    <Link
+                      href={`/yonetim/calisanlar/${employee.id}/blocked-times`}
+                      className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+                    >
+                      İzinli zamanlar →
+                    </Link>
+                  </div>
+
                   {/* Aktif/Pasif */}
                   <div className="mt-3 flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">

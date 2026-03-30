@@ -142,39 +142,15 @@ export async function GET(
       }
     }
 
-    const freeRanges: Array<{ start: number; end: number }> = [];
-    let cursor = workStart;
-
-    for (const range of merged) {
-      if (range.start > cursor) {
-        freeRanges.push({
-          start: cursor,
-          end: range.start,
-        });
-      }
-
-      cursor = Math.max(cursor, range.end);
-    }
-
-    if (cursor < workEnd) {
-      freeRanges.push({
-        start: cursor,
-        end: workEnd,
-      });
-    }
-
+    // Sabit grid: workStart'tan totalDuration adımlarıyla slot adayları üret,
+    // her aday busy range'e denk geliyorsa atla.
     const slots: Array<{ start: string; end: string }> = [];
 
-    for (const range of freeRanges) {
-      let slotStart = range.start;
-
-      while (slotStart + totalDuration <= range.end) {
-        slots.push({
-          start: timeString(slotStart),
-          end: timeString(slotStart + totalDuration),
-        });
-
-        slotStart += totalDuration;
+    for (let slotStart = workStart; slotStart + totalDuration <= workEnd; slotStart += totalDuration) {
+      const slotEnd = slotStart + totalDuration;
+      const isBusy = merged.some((r) => r.start < slotEnd && r.end > slotStart);
+      if (!isBusy) {
+        slots.push({ start: timeString(slotStart), end: timeString(slotEnd) });
       }
     }
 
