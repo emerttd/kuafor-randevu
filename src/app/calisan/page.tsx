@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export const runtime = "nodejs";
 
 export default async function CalisanIndexPage() {
+  const session = await auth();
+  if (session?.user.role === "EMPLOYEE") {
+    redirect(`/calisan/${session.user.id}`);
+  }
   const employees = await prisma.user.findMany({
     where: {
       role: "EMPLOYEE",

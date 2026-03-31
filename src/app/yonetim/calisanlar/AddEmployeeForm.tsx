@@ -40,6 +40,30 @@ export function AddEmployeeForm() {
                 className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none placeholder:text-muted-foreground"
               />
             </div>
+            <div>
+              <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Örn: ahmet@berber.com"
+                className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
+                Şifre
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="En az 6 karakter"
+                className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none placeholder:text-muted-foreground"
+              />
+            </div>
             <SubmitButton label="Ekle" className="h-11 bg-foreground text-background" />
           </form>
         </div>

@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { auth, signOut } from "@/auth";
+import { redirect } from "next/navigation";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusActions } from "@/components/ui/status-actions";
 import { DatePicker } from "./DatePicker";
@@ -107,6 +109,11 @@ export default async function CalisanPanel({
   const { workerId } = await params;
   const { date } = await searchParams;
 
+  const session = await auth();
+  if (session?.user.role === "EMPLOYEE" && session.user.id !== workerId) {
+    redirect("/calisan");
+  }
+
   const selected = date ? new Date(`${date}T00:00:00Z`) : new Date();
   selected.setUTCHours(0, 0, 0, 0);
 
@@ -135,9 +142,16 @@ export default async function CalisanPanel({
     <main className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-2xl px-4 py-8">
         <header className="mb-6">
-          <Link href="/calisan" className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-block">
-            ← Çalışanlar
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link href="/calisan" className="text-xs text-muted-foreground hover:text-foreground">
+              ← Çalışanlar
+            </Link>
+            <form action={async () => { "use server"; await signOut({ redirectTo: "/giris" }) }}>
+              <button type="submit" className="text-xs text-muted-foreground hover:text-foreground">
+                Çıkış Yap
+              </button>
+            </form>
+          </div>
           <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold">Randevular</h1>
