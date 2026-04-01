@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { updateEmployee, toggleEmployeeStatus, updateEmployeeServices } from "./actions";
 import { AddEmployeeForm } from "./AddEmployeeForm";
+import { DeleteEmployeeButton } from "./DeleteEmployeeButton";
 import { SubmitButton } from "@/components/ui/submit-button";
 
 export const runtime = "nodejs";
@@ -56,10 +57,11 @@ export default async function EmployeeManagementPage() {
               {employees.map((employee) => (
                 <div
                   key={employee.id}
-                  className="rounded-xl border border-border bg-card p-4"
+                  className="relative rounded-xl border border-border bg-card p-4"
                 >
+                  <DeleteEmployeeButton employeeId={employee.id} employeeName={employee.name} />
                   {/* Ad düzenleme */}
-                  <form action={updateEmployee} className="space-y-3">
+                  <form action={updateEmployee} className="space-y-3 pt-6">
                     <input type="hidden" name="employeeId" value={employee.id} />
                     <div>
                       <label

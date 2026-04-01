@@ -76,6 +76,51 @@ export async function toggleEmployeeStatus(formData: FormData) {
   revalidatePath("/calisan");
 }
 
+export async function deleteEmployee(formData: FormData) {
+  const employeeId = formData.get("employeeId");
+  if (typeof employeeId !== "string") throw new Error("Geçersiz çalışan");
+
+  const futureActive = await prisma.appointment.findFirst({
+    where: {
+      employeeId,
+      status: { in: ["PENDING", "CONFIRMED"] },
+      startTime: { gte: new Date() },
+    },
+    select: { id: true },
+  });
+
+  if (futureActive) {
+    throw new Error(
+      "Bu çalışanın bekleyen veya onaylanmış gelecekteki randevuları olduğu için silinemez."
+    );
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const appointments = await tx.appointment.findMany({
+      where: { employeeId },
+      select: { id: true },
+    });
+
+    const appointmentIds = appointments.map((a) => a.id);
+
+    if (appointmentIds.length > 0) {
+      await tx.appointmentService.deleteMany({
+        where: { appointmentId: { in: appointmentIds } },
+      });
+      await tx.appointment.deleteMany({
+        where: { id: { in: appointmentIds } },
+      });
+    }
+
+    await tx.workSchedule.deleteMany({ where: { employeeId } });
+    await tx.blockedTime.deleteMany({ where: { employeeId } });
+    await tx.workerService.deleteMany({ where: { workerId: employeeId } });
+    await tx.user.delete({ where: { id: employeeId } });
+  });
+
+  revalidatePath("/yonetim/calisanlar");
+}
+
 export async function updateEmployeeServices(formData: FormData) {
   const employeeId = formData.get("employeeId");
   const serviceIds = formData.getAll("serviceIds");
