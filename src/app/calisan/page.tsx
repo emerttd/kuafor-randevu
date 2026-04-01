@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
+import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 
 export const runtime = "nodejs";
@@ -28,6 +28,13 @@ export default async function CalisanIndexPage() {
     <main className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-2xl px-4 py-8">
         <header className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <form action={async () => { "use server"; await signOut({ redirectTo: "/giris" }) }}>
+              <button type="submit" className="text-xs text-muted-foreground hover:text-foreground">
+                Çıkış Yap
+              </button>
+            </form>
+          </div>
           <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold">Çalışanlar</h1>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { updateService } from "./actions";
+import { DeleteServiceButton } from "./DeleteServiceButton";
 import { AddServiceForm } from "./AddServiceForm";
 
 export const runtime = "nodejs";
@@ -41,8 +42,9 @@ export default async function ServiceManagementPage() {
           ) : (
             <div className="space-y-3">
               {services.map((service) => (
-                <div key={service.id} className="rounded-xl border border-border bg-card p-4">
-                  <form action={updateService} className="space-y-3">
+                <div key={service.id} className="relative rounded-xl border border-border bg-card p-4">
+                  <DeleteServiceButton serviceId={service.id} serviceName={service.name} />
+                  <form action={updateService} className="space-y-3 pt-3">
                     <input type="hidden" name="serviceId" value={service.id} />
                     <div>
                       <label className="mb-1 block text-sm font-medium text-foreground">
@@ -84,7 +86,7 @@ export default async function ServiceManagementPage() {
                     </div>
                     <SubmitButton
                       label="Kaydet"
-                      className="h-10 rounded-xl bg-foreground px-4 text-sm font-medium text-background"
+                      className="h-10 w-full rounded-xl bg-foreground px-4 text-sm font-medium text-background"
                     />
                   </form>
                 </div>

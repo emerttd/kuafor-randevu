@@ -1,17 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusActions } from "@/components/ui/status-actions";
 import { DatePicker } from "./DatePicker";
-import { Appointment, AppointmentService, Service, User } from "@prisma/client";
 import Link from "next/link";
 
 export const runtime = "nodejs";
 
-type AppointmentWithRelations = Appointment & {
-  customer: User;
-  services: (AppointmentService & { service: Service })[];
+type AppointmentItem = {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+  customer: { name: string | null; phone: string | null };
+  services: { serviceKey: string; name: string; price: number }[];
 };
 
 function toTimeString(date: Date) {
@@ -24,13 +28,10 @@ function toDateString(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-function AppointmentCard({ appointment }: { appointment: AppointmentWithRelations }) {
+function AppointmentCard({ appointment }: { appointment: AppointmentItem }) {
   const start = toTimeString(appointment.startTime);
   const end = toTimeString(appointment.endTime);
-  const totalPrice = appointment.services.reduce(
-    (sum, appointmentService) => sum + Number(appointmentService.service.price),
-    0
-  );
+  const totalPrice = appointment.services.reduce((sum, s) => sum + Number(s.price), 0);
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-2">
@@ -50,12 +51,9 @@ function AppointmentCard({ appointment }: { appointment: AppointmentWithRelation
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {appointment.services.map((appointmentService) => (
-          <span
-            key={appointmentService.serviceId}
-            className="text-xs bg-muted px-2 py-1 rounded-md"
-          >
-            {appointmentService.service.name}
+        {appointment.services.map((s) => (
+          <span key={s.serviceKey} className="text-xs bg-muted px-2 py-1 rounded-md">
+            {s.name}
           </span>
         ))}
       </div>
@@ -76,7 +74,7 @@ function Section({
   emptyText,
 }: {
   title: string;
-  appointments: AppointmentWithRelations[];
+  appointments: AppointmentItem[];
   emptyText?: string;
 }) {
   return (
@@ -120,17 +118,72 @@ export default async function CalisanPanel({
   const nextDay = new Date(selected);
   nextDay.setUTCDate(selected.getUTCDate() + 1);
 
-  const appointments = await prisma.appointment.findMany({
-    where: {
-      employeeId: workerId,
-      startTime: { gte: selected, lt: nextDay },
-    },
-    orderBy: { startTime: "asc" },
-    include: {
-      customer: true,
-      services: { include: { service: true } },
-    },
-  });
+  let appointments: AppointmentItem[] = [];
+
+  if (session?.user.role === "EMPLOYEE") {
+    // API üzerinden — session ile kimlik doğrulanır, workerId'ye güvenilmez
+    const cookieStore = await cookies();
+    const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+
+    const res = await fetch(`${baseUrl}/api/appointments/employee/me`, {
+      headers: { Cookie: cookieStore.toString() },
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      appointments = data
+        .map((a: {
+          id: string;
+          startTime: string;
+          endTime: string;
+          status: AppointmentItem["status"];
+          customer: { name: string | null; phone: string | null };
+          services: { service: { id: string; name: string; price: number } }[];
+        }) => ({
+          id: a.id,
+          startTime: new Date(a.startTime),
+          endTime: new Date(a.endTime),
+          status: a.status,
+          customer: a.customer,
+          services: a.services.map((s) => ({
+            serviceKey: s.service.id,
+            name: s.service.name,
+            price: s.service.price,
+          })),
+        }))
+        .filter(
+          (a: AppointmentItem) =>
+            a.startTime >= selected && a.startTime < nextDay
+        );
+    }
+  } else {
+    // ADMIN: Prisma ile direkt (admin flow ileride ayrı güvence altına alınacak)
+    const raw = await prisma.appointment.findMany({
+      where: {
+        employeeId: workerId,
+        startTime: { gte: selected, lt: nextDay },
+      },
+      orderBy: { startTime: "asc" },
+      include: {
+        customer: true,
+        services: { include: { service: true } },
+      },
+    });
+
+    appointments = raw.map((a) => ({
+      id: a.id,
+      startTime: a.startTime,
+      endTime: a.endTime,
+      status: a.status,
+      customer: { name: a.customer.name, phone: a.customer.phone },
+      services: a.services.map((s) => ({
+        serviceKey: s.serviceId,
+        name: s.service.name,
+        price: Number(s.service.price),
+      })),
+    }));
+  }
 
   const pending = appointments.filter((a) => a.status === "PENDING");
   const confirmed = appointments.filter((a) => a.status === "CONFIRMED");

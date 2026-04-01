@@ -59,12 +59,7 @@ export default function AppointmentConfirm({
       return;
     }
 
-    if (!normalizedPhone) {
-      setError("Telefon numarası zorunlu.");
-      return;
-    }
-
-    if (normalizedPhone.length < 10) {
+    if (!normalizedPhone || normalizedPhone.length < 10) {
       setError("Geçerli bir telefon numarası girin.");
       return;
     }
@@ -76,10 +71,7 @@ export default function AppointmentConfirm({
       const customerRes = await fetch("/api/customer/find-or-create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: trimmedName,
-          phone: normalizedPhone,
-        }),
+        body: JSON.stringify({ name: trimmedName, phone: normalizedPhone }),
       });
 
       if (!customerRes.ok) {
@@ -101,9 +93,14 @@ export default function AppointmentConfirm({
         }),
       });
 
+      if (appointmentRes.status === 409) {
+        setError("Bu saat aralığında randevu zaten var. Lütfen başka bir saat seçin.");
+        return;
+      }
+
       if (!appointmentRes.ok) {
         const data = await appointmentRes.json().catch(() => null);
-        throw new Error(data?.message || "Randevu oluşturulurken bir hata oluştu.");
+        throw new Error(data?.error || "Randevu oluşturulurken bir hata oluştu.");
       }
 
       router.push("/randevu/basarili");
