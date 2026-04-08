@@ -10,14 +10,17 @@ export async function createBlockedTime(
   formData: FormData
 ): Promise<Result> {
   const workerId = String(formData.get("workerId") || "");
-  const date = String(formData.get("date") || "");
+  const startDate = String(formData.get("startDate") || "");
+  const endDate = String(formData.get("endDate") || "");
   const isAllDay = formData.get("isAllDay") === "on";
   const start = String(formData.get("startTime") || "");
   const end = String(formData.get("endTime") || "");
   const reason = String(formData.get("reason") || "").trim();
 
   if (!workerId) return { success: false, error: "Çalışan ID zorunlu" };
-  if (!date) return { success: false, error: "Tarih zorunlu" };
+  if (!startDate) return { success: false, error: "Başlangıç tarihi zorunlu" };
+  if (!endDate) return { success: false, error: "Bitiş tarihi zorunlu" };
+  if (endDate < startDate) return { success: false, error: "Bitiş tarihi başlangıç tarihinden önce olamaz" };
 
   if (!isAllDay) {
     if (!start || !end) return { success: false, error: "Başlangıç ve bitiş saati zorunlu" };
@@ -32,14 +35,26 @@ export async function createBlockedTime(
   if (!worker) return { success: false, error: "Çalışan bulunamadı" };
   if (worker.role !== "EMPLOYEE") return { success: false, error: "Sadece çalışanlar için blok tanımlanabilir" };
 
-  await prisma.blockedTime.create({
-    data: {
+  const startTime = isAllDay ? null : new Date(Date.UTC(1970, 0, 1, ...start.split(":").map(Number) as [number, number]));
+  const endTime = isAllDay ? null : new Date(Date.UTC(1970, 0, 1, ...end.split(":").map(Number) as [number, number]));
+
+  const days: Date[] = [];
+  const current = new Date(`${startDate}T00:00:00.000Z`);
+  const last = new Date(`${endDate}T00:00:00.000Z`);
+  while (current <= last) {
+    days.push(new Date(current));
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+
+  await prisma.blockedTime.createMany({
+    data: days.map((date) => ({
       employeeId: workerId,
-      date: new Date(`${date}T00:00:00.000Z`),
-      startTime: isAllDay ? null : new Date(Date.UTC(1970, 0, 1, ...start.split(":").map(Number) as [number, number])),
-      endTime: isAllDay ? null : new Date(Date.UTC(1970, 0, 1, ...end.split(":").map(Number) as [number, number])),
+      date,
+      startTime,
+      endTime,
       reason: reason || null,
-    },
+    })),
+    skipDuplicates: true,
   });
 
   revalidatePath(`/yonetim/calisanlar/${workerId}/blocked-times`);

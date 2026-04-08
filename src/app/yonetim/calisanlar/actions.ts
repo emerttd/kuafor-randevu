@@ -76,9 +76,42 @@ export async function toggleEmployeeStatus(formData: FormData) {
   revalidatePath("/calisan");
 }
 
-export async function deleteEmployee(formData: FormData) {
+export async function updateEmployeeCredentials(formData: FormData) {
   const employeeId = formData.get("employeeId");
-  if (typeof employeeId !== "string") throw new Error("Geçersiz çalışan");
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  if (typeof employeeId !== "string" || typeof email !== "string" || typeof password !== "string") {
+    throw new Error("Geçersiz form verisi");
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+  if (!normalizedEmail) throw new Error("Email zorunlu");
+
+  const existing = await prisma.user.findFirst({
+    where: { email: normalizedEmail, NOT: { id: employeeId } },
+    select: { id: true },
+  });
+  if (existing) throw new Error("Bu email zaten kullanımda");
+
+  const data: { email: string; password?: string } = { email: normalizedEmail };
+
+  if (password.trim()) {
+    if (password.length < 6) throw new Error("Şifre en az 6 karakter olmalı");
+    data.password = await bcrypt.hash(password, 12);
+  }
+
+  await prisma.user.update({ where: { id: employeeId }, data });
+
+  revalidatePath("/yonetim/calisanlar");
+}
+
+export async function deleteEmployee(
+  _prev: { error: string } | null,
+  formData: FormData
+): Promise<{ error: string } | null> {
+  const employeeId = formData.get("employeeId");
+  if (typeof employeeId !== "string") return { error: "Geçersiz çalışan" };
 
   const futureActive = await prisma.appointment.findFirst({
     where: {
@@ -90,9 +123,9 @@ export async function deleteEmployee(formData: FormData) {
   });
 
   if (futureActive) {
-    throw new Error(
-      "Bu çalışanın bekleyen veya onaylanmış gelecekteki randevuları olduğu için silinemez."
-    );
+    return {
+      error: "Bu çalışanın bekleyen veya onaylanmış gelecekteki randevuları olduğu için silinemez.",
+    };
   }
 
   await prisma.$transaction(async (tx) => {
@@ -119,6 +152,7 @@ export async function deleteEmployee(formData: FormData) {
   });
 
   revalidatePath("/yonetim/calisanlar");
+  return null;
 }
 
 export async function updateEmployeeServices(formData: FormData) {

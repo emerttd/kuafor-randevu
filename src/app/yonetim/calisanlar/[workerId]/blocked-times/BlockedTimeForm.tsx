@@ -24,14 +24,25 @@ export function BlockedTimeForm({ workerId }: { workerId: string }) {
         </div>
       )}
 
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Tarih</label>
-        <input
-          name="date"
-          type="date"
-          required
-          className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none"
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Başlangıç Tarihi</label>
+          <input
+            name="startDate"
+            type="date"
+            required
+            className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Bitiş Tarihi</label>
+          <input
+            name="endDate"
+            type="date"
+            required
+            className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none"
+          />
+        </div>
       </div>
 
       <label className="flex items-center gap-2 text-sm">
@@ -47,7 +58,7 @@ export function BlockedTimeForm({ workerId }: { workerId: string }) {
       {!isAllDay && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">Başlangıç</label>
+            <label className="text-xs text-muted-foreground">Başlangıç Saati</label>
             <input
               name="startTime"
               type="time"
@@ -55,7 +66,7 @@ export function BlockedTimeForm({ workerId }: { workerId: string }) {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">Bitiş</label>
+            <label className="text-xs text-muted-foreground">Bitiş Saati</label>
             <input
               name="endTime"
               type="time"

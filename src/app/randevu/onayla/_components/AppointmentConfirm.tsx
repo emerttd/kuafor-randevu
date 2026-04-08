@@ -196,7 +196,7 @@ export default function AppointmentConfirm({
                 inputMode="numeric"
                 autoComplete="tel"
                 value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
+                onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ""))}
                 placeholder="05xx xxx xx xx"
                 className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none transition-colors focus:border-foreground"
               />

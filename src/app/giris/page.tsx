@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import Link from "next/link"
 import { login } from "./actions"
 
 interface Props {
@@ -19,6 +20,13 @@ export default async function GirisPage({ searchParams }: Props) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-6">
+        <Link
+          href="/"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          ← Ana Sayfa
+        </Link>
+
         <div className="space-y-1 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Giriş Yap</h1>
           <p className="text-sm text-muted-foreground">Email ve şifrenizle giriş yapın</p>

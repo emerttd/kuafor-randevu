@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { updateEmployee, toggleEmployeeStatus, updateEmployeeServices } from "./actions";
+import { updateEmployee, toggleEmployeeStatus, updateEmployeeServices, updateEmployeeCredentials } from "./actions";
 import { AddEmployeeForm } from "./AddEmployeeForm";
 import { DeleteEmployeeButton } from "./DeleteEmployeeButton";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -15,6 +15,7 @@ export default async function EmployeeManagementPage() {
       select: {
         id: true,
         name: true,
+        email: true,
         isActive: true,
         workerServices: { select: { serviceId: true } },
       },
@@ -81,6 +82,35 @@ export default async function EmployeeManagementPage() {
                     <SubmitButton
                       label="Kaydet"
                       className="h-9 bg-foreground text-background"
+                    />
+                  </form>
+
+                  {/* Email / Şifre */}
+                  <form action={updateEmployeeCredentials} className="mt-3 space-y-2 border-t border-border pt-3">
+                    <input type="hidden" name="employeeId" value={employee.id} />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <label className="text-xs text-muted-foreground">Email</label>
+                        <input
+                          name="email"
+                          type="email"
+                          defaultValue={employee.email}
+                          className="h-9 w-full rounded-xl border border-border bg-background px-3 text-xs outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs text-muted-foreground">Yeni şifre</label>
+                        <input
+                          name="password"
+                          type="password"
+                          placeholder="Değiştirmek için gir"
+                          className="h-9 w-full rounded-xl border border-border bg-background px-3 text-xs outline-none placeholder:text-muted-foreground"
+                        />
+                      </div>
+                    </div>
+                    <SubmitButton
+                      label="Güncelle"
+                      className="h-8 rounded-xl border border-border px-3 text-xs font-medium text-foreground bg-transparent"
                     />
                   </form>
 
